@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="id">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>RBMJ Portal (Web)</title>
 <style>
 :root{--bg:#f8fafc;--card:#fff;--line:#e5e7eb;--text:#111827;--muted:#6b7280;--primary:#2563eb}
@@ -41,7 +41,7 @@ textarea{min-height:80px}
   <div class="header">
     <div>
       <div class="brand" id="brandName">RBMJ</div>
-      <div class="sub" id="brandTag">Portal Administrasi (Web)</div>
+      <div class="sub" id="brandTag">Portal Administrasi</div>
     </div>
     <div class="sub" id="brandLink"></div>
   </div>
@@ -149,89 +149,85 @@ textarea{min-height:80px}
     </div>
   </div>
 
-  <div class="banner" id="netErr">Tidak bisa menjangkau API. Coba nonaktifkan VPN/Private DNS/ad-blocker untuk domain Google, lalu reload.</div>
+  <div class="banner" id="netErr">Tidak bisa menjangkau API. Pastikan URL /exec benar & tidak diblok VPN/Private DNS.</div>
 </div>
 
 <script>
-/* ======= KONFIG ======= */
-const GAS_BASE = 'https://script.google.com/macros/s/AKfycbwKh033sPydZWdtw4Iv4wX7d-VQUa10tqbtJP8FyvPEe6gB7_mJxJ6qBHlX94aacSAz/exec'; // <<<<<<<<<<<<<< set ke URL /exec
+/* ===== KONFIG ===== */
+const GAS_BASE = 'PASTE_URL_EXEC_DI_SINI'; // ganti dgn URL /exec kamu
 
-/* ======= UTILS ======= */
+/* ===== UTILS ===== */
 const $ = id => document.getElementById(id);
-const esc = s => String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[m]));
+const esc = s => String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&gt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[m]));
 const rupiah = n => new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(Number(n||0));
 const getJSON = async (params) => {
+  params = {...params, _t: Date.now()};
   const url = GAS_BASE + (GAS_BASE.includes('?')?'&':'?') + new URLSearchParams(params).toString();
   try{
     const r = await fetch(url, {mode:'cors',cache:'no-store'});
-    const t = await r.text();
-    try{ return JSON.parse(t); }catch{ return {ok:false,error:'Bad JSON',raw:t}; }
+    const t = await r.text(); try{return JSON.parse(t);}catch{ return {ok:false,error:'Bad JSON',raw:t}; }
   }catch(e){ $('netErr').style.display='block'; throw e; }
 };
 const postJSON = async (action, body) => {
   try{
     const r = await fetch(GAS_BASE + (GAS_BASE.includes('?')?'&':'?') + 'action=' + encodeURIComponent(action), {
-      method:'POST', mode:'cors', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body||{}), cache:'no-store'
+      method:'POST', mode:'cors', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(body||{}), cache:'no-store'
     });
     return await r.json();
   }catch(e){ $('netErr').style.display='block'; throw e; }
 };
 
-/* ======= TABS ======= */
+/* ===== TABS ===== */
 document.querySelectorAll('.tab').forEach(b=>{
-  b.onclick = () => {
-    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  b.onclick=()=>{ document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
     b.classList.add('active');
     const id=b.dataset.tab;
     ['pay','invoice','pengeluaran','mukafaah','roster','absen','resume'].forEach(t=>{
-      $('tab-'+t).style.display = (t===id)?'block':'none';
+      $('tab-'+t).style.display=(t===id)?'block':'none';
     });
   };
 });
 
-/* ======= INIT ======= */
+/* ===== INIT ===== */
 (async function init(){
   try{
     const br = await getJSON({action:'brand'});
-    if (br.ok && br.data){
-      $('brandName').textContent = br.data.name || 'RBMJ';
-      $('brandTag').textContent  = br.data.tagline || '';
-      $('brandLink').innerHTML   = br.data.webUrl ? `Web App: <a href="${br.data.webUrl}" target="_blank">${esc(br.data.webUrl)}</a>` : '';
-    }
+    if (br.ok && br.data){ $('brandName').textContent=br.data.name||'RBMJ'; $('brandTag').textContent=br.data.tagline||''; }
   }catch(_){}
 
   const kls = await getJSON({action:'listKelas'});
   const metode = await getJSON({action:'listMetode'});
-  const setOpts = (sel, arr, map=v=>({value:v,label:v}))=>{
-    sel.innerHTML = (arr.data||[]).map(v=>{const {value,label}=map(v);return `<option value="${esc(value)}">${esc(label)}</option>`}).join('');
-  };
-  ['payKelas','invKelas','rosKelas','absKelas','sumKelas'].forEach(id=> setOpts($(id), kls.data||[]));
-  setOpts($('payMetode'), metode.data||[]);
 
-  const now = new Date(), ym = now.toISOString().slice(0,7);
-  ['payPeriode','invPeriode','sumPeriode','mukPeriode'].forEach(id=> $(id).value = ym);
+  const setOpts = (sel, arr, map=v=>({value:v,label:v}))=>{
+    sel.innerHTML = (arr.data||[]).map(v=>{ const {value,label}=map(v); return `<option value="${esc(value)}">${esc(label)}</option>`; }).join('');
+  };
+  ['payKelas','invKelas','rosKelas','absKelas','sumKelas'].forEach(id=> setOpts($(id), kls));
+  setOpts($('payMetode'), metode);
+
+  const now=new Date(), ym=now.toISOString().slice(0,7);
+  ['payPeriode','invPeriode','sumPeriode','mukPeriode'].forEach(id=> $(id).value=ym);
   $('invJt').value = new Date(Date.now()+7*24*3600*1000).toISOString().slice(0,10);
-  $('absTgl').value = now.toISOString().slice(0,10);
-  $('mukTgl').value = now.toISOString().slice(0,10);
-  $('outTgl').value = now.toISOString().slice(0,10);
+  $('absTgl').value=now.toISOString().slice(0,10);
+  $('mukTgl').value=now.toISOString().slice(0,10);
+  $('outTgl').value=now.toISOString().slice(0,10);
 
   refreshPayStudents(); refreshInvStudents(); refreshRoster(); refreshResume();
 })();
 
-/* ======= PAY ======= */
+/* ===== PAY ===== */
 async function refreshPayStudents(){
-  const kelas=$('payKelas').value, only= $('payOnly').value==='true';
-  const r = await getJSON({action:'listSiswaByKelas', kelas, onlyActive:String(only)});
+  const kelas=$('payKelas').value, only=$('payOnly').value==='true';
+  const r = await getJSON({action:'listSiswaByKelas',kelas,onlyActive:String(only)});
   $('payNis').innerHTML = (r.data||[]).map(s=>`<option value="${esc(s.nis)}">${esc(s.nis+' — '+s.nama)}</option>`).join('');
-  if ((r.data||[]).length){
-    const n = await getJSON({action:'computeTarif', nis:r.data[0].nis, periode:$('payPeriode').value, kelas});
+  if((r.data||[]).length){
+    const n = await getJSON({action:'computeTarif',nis:r.data[0].nis,periode:$('payPeriode').value,kelas});
     $('payNominal').value = n.data || '';
   }
 }
-$('payKelas').onchange = refreshPayStudents;
-$('payOnly').onchange = refreshPayStudents;
+$('payKelas').onchange=refreshPayStudents; $('payOnly').onchange=refreshPayStudents;
 $('payNis').onchange = async ()=>{
-  if (!$('payNis').value) return;
+  if(!$('payNis').value) return;
   const n = await getJSON({action:'computeTarif', nis:$('payNis').value, periode:$('payPeriode').value, kelas:$('payKelas').value});
   $('payNominal').value = n.data || '';
 };
@@ -240,40 +236,38 @@ $('payPeriode').onchange = $('payNis').onchange;
 $('btnPay').onclick = async ()=>{
   const nis=$('payNis').value, prd=$('payPeriode').value, nominal=Number($('payNominal').value||0),
         metode=$('payMetode').value, ket=$('payKet').value, kelas=$('payKelas').value;
-  if(!nis || !prd || !nominal){ $('payRes').textContent='Lengkapi data'; return; }
+  if(!nis || !prd || !nominal){ $('payRes').textContent='Lengkapi data.'; return; }
   $('btnPay').disabled=true; $('payRes').textContent='Memproses...';
-  const r = await postJSON('createPayment', {nis,periode:prd,nominal,metode,ket,kelas});
-  $('btnPay').disabled=false;
-  $('payRes').innerHTML = r.ok ? `OK. <a href="${esc(r.data)}" target="_blank">Buka Kwitansi PDF</a>` : ('Error: '+esc(r.error));
+  const r = await postJSON('createPayment',{nis,periode:prd,nominal,metode,ket,kelas});
+  $('btnPay').disabled=false; $('payRes').innerHTML = r.ok? `OK. <a target="_blank" href="${esc(r.data)}">Kwitansi PDF</a>` : ('Error: '+esc(r.error));
 };
 
-/* ======= Riwayat + CSV ======= */
+/* ===== Riwayat + CSV ===== */
 let HROWS=[];
 $('btnHist').onclick = async ()=>{
   const nis=$('payNis').value; if(!nis) return alert('Pilih NIS dulu.');
-  $('histNis').textContent = nis; $('histBody').innerHTML='<tr><td colspan="6" class="muted">Memuat...</td></tr>';
+  $('histNis').textContent=nis; $('histBody').innerHTML='<tr><td colspan="6" class="muted">Memuat...</td></tr>';
   $('histModal').style.display='flex';
   const r = await getJSON({action:'paymentHistory', nis});
-  HROWS = (r.data||[]);
-  renderHist();
+  HROWS = r.data||[]; renderHist();
 };
 $('btnHistFilter').onclick = async ()=>{
   const nis=$('payNis').value, per=$('histPeriode').value.trim();
   $('histBody').innerHTML='<tr><td colspan="6" class="muted">Memuat...</td></tr>';
   const r = await getJSON({action:'paymentHistory', nis, periode:per});
-  HROWS = (r.data||[]); renderHist();
+  HROWS = r.data||[]; renderHist();
 };
 $('btnHistCsv').onclick = ()=>{
   if(!HROWS.length) return alert('Tidak ada data.');
   const head=['Tanggal','Periode','Nominal','Metode','Keterangan','NoKwitansi'];
-  const lines = HROWS.map(r=>[r.tanggal||'',r.periode||'',Number(r.nominal||0),r.metode||'',r.ket||'',r.kwitansi||'']
+  const lines=HROWS.map(r=>[r.tanggal||'',r.periode||'',Number(r.nominal||0),r.metode||'',r.ket||'',r.kwitansi||'']
     .map(s=>{s=String(s);return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;}).join(','));
-  const csv = head.join(',')+'\r\n'+lines.join('\r\n');
+  const csv=head.join(',')+'\r\n'+lines.join('\r\n');
   const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
   a.download='riwayat_'+($('payNis').value||'')+(($('histPeriode').value||'')?('_'+$('histPeriode').value):'')+'.csv';
   document.body.appendChild(a); a.click(); a.remove();
 };
-$('btnHistClose').onclick = ()=>{ $('histModal').style.display='none'; };
+$('btnHistClose').onclick=()=>{ $('histModal').style.display='none'; };
 function renderHist(){
   $('histBody').innerHTML = HROWS.length? HROWS.map(r=>`
     <tr><td>${esc(r.tanggal||'')}</td><td>${esc(r.periode||'')}</td>
@@ -282,78 +276,78 @@ function renderHist(){
   `).join('') : '<tr><td colspan="6" class="muted">Tidak ada data.</td></tr>';
 }
 
-/* ======= INVOICE ======= */
+/* ===== INVOICE ===== */
 async function refreshInvStudents(){
   const kelas=$('invKelas').value, only=$('invOnly').value==='true';
-  const r = await getJSON({action:'listSiswaByKelas', kelas, onlyActive:String(only)});
-  $('invNis').innerHTML = (r.data||[]).map(s=>`<option value="${esc(s.nis)}">${esc(s.nis+' — '+s.nama)}</option>`).join('');
-  if ((r.data||[]).length){
-    const n = await getJSON({action:'computeTarif', nis:r.data[0].nis, periode:$('invPeriode').value, kelas});
-    $('invJumlah').value = n.data || '';
+  const r=await getJSON({action:'listSiswaByKelas',kelas,onlyActive:String(only)});
+  $('invNis').innerHTML=(r.data||[]).map(s=>`<option value="${esc(s.nis)}">${esc(s.nis+' — '+s.nama)}</option>`).join('');
+  if((r.data||[]).length){
+    const n=await getJSON({action:'computeTarif',nis:r.data[0].nis,periode:$('invPeriode').value,kelas});
+    $('invJumlah').value=n.data||'';
   }
 }
 $('invKelas').onchange=refreshInvStudents; $('invOnly').onchange=refreshInvStudents;
 $('invNis').onchange = async ()=>{
-  if (!$('invNis').value) return;
-  const n = await getJSON({action:'computeTarif', nis:$('invNis').value, periode:$('invPeriode').value, kelas:$('invKelas').value});
-  $('invJumlah').value = n.data || '';
+  if(!$('invNis').value) return;
+  const n=await getJSON({action:'computeTarif',nis:$('invNis').value,periode:$('invPeriode').value,kelas:$('invKelas').value});
+  $('invJumlah').value=n.data||'';
 };
-$('invPeriode').onchange = $('invNis').onchange;
-$('btnInvoice').onclick = async ()=>{
-  const pay = { nis:$('invNis').value, periode:$('invPeriode').value, jumlah:Number($('invJumlah').value||0), jtISO:$('invJt').value, kelas:$('invKelas').value };
-  if(!pay.nis || !pay.periode || !pay.jumlah || !pay.jtISO){ $('invRes').textContent='Lengkapi data.'; return; }
+$('invPeriode').onchange=$('invNis').onchange;
+$('btnInvoice').onclick=async ()=>{
+  const body={ nis:$('invNis').value, periode:$('invPeriode').value, jumlah:Number($('invJumlah').value||0), jtISO:$('invJt').value, kelas:$('invKelas').value };
+  if(!body.nis || !body.periode || !body.jumlah || !body.jtISO){ $('invRes').textContent='Lengkapi data.'; return; }
   $('btnInvoice').disabled=true; $('invRes').textContent='Memproses...';
-  const r = await postJSON('createInvoice', pay);
-  $('btnInvoice').disabled=false; $('invRes').innerHTML = r.ok ? `OK. <a target="_blank" href="${esc(r.data)}">Buka PDF</a>` : ('Error: '+esc(r.error));
+  const r=await postJSON('createInvoice', body);
+  $('btnInvoice').disabled=false; $('invRes').innerHTML = r.ok? `OK. <a target="_blank" href="${esc(r.data)}">Buka PDF</a>` : ('Error: '+esc(r.error));
 };
 
-/* ======= PENGELUARAN ======= */
-$('btnOut').onclick = async ()=>{
+/* ===== PENGELUARAN ===== */
+$('btnOut').onclick=async ()=>{
   const body={ tglISO:$('outTgl').value, kategori:$('outKat').value, deskripsi:$('outDesk').value, nominal:Number($('outNom').value||0), by:$('outBy').value };
   if(!body.tglISO || !body.kategori || !body.deskripsi || !body.nominal || !body.by){ $('outRes').textContent='Lengkapi semua field.'; return; }
   $('btnOut').disabled=true; $('outRes').textContent='Memproses...';
-  const r = await postJSON('addExpense', body);
+  const r=await postJSON('addExpense', body);
   $('btnOut').disabled=false; $('outRes').textContent = r.ok? ('OK. ID: '+(r.data.id||'')) : ('Error: '+esc(r.error));
 };
 
-/* ======= MUKAFAAH ======= */
-$('btnMukHitung').onclick = async ()=>{
+/* ===== MUKAFAAH ===== */
+$('btnMukHitung').onclick=async ()=>{
   const periode=$('mukPeriode').value; if(!periode) return $('mukRes').textContent='Isi periode.';
   $('btnMukHitung').disabled=true; $('mukRes').textContent='Memproses...';
-  const r = await postJSON('mukHitung', {periode});
+  const r=await postJSON('mukHitung',{periode});
   $('btnMukHitung').disabled=false; $('mukRes').textContent = r.ok? `Kelas: ${r.data.count} • Total SPP: ${rupiah(r.data.totalSPP)} • Mukafaah: ${rupiah(r.data.totalMuk)}` : ('Error: '+esc(r.error));
 };
-$('btnMukBayar').onclick = async ()=>{
+$('btnMukBayar').onclick=async ()=>{
   const body={periode:$('mukPeriode').value, tglISO:$('mukTgl').value, by:$('mukBy').value, metode:$('mukMet').value};
-  if(!body.periode || !body.tglISO || !body.by){ $('mukBayarRes').textContent='Lengkapi data'; return; }
+  if(!body.periode || !body.tglISO || !body.by){ $('mukBayarRes').textContent='Lengkapi data.'; return; }
   $('btnMukBayar').disabled=true; $('mukBayarRes').textContent='Memproses...';
-  const r = await postJSON('mukBayarAll', body);
+  const r=await postJSON('mukBayarAll', body);
   $('btnMukBayar').disabled=false; $('mukBayarRes').textContent = r.ok? `Slip terbayar: ${r.data.paidCount} • Total: ${rupiah(r.data.totalMuk)}` : ('Error: '+esc(r.error));
 };
 
-/* ======= ROSTER ======= */
+/* ===== ROSTER ===== */
 async function refreshRoster(){
   const kelas=$('rosKelas').value, only=$('rosOnly').value==='true';
-  const r = await getJSON({action:'roster', kelas, onlyActive:String(only)});
-  if (!r.ok) { $('rosBody').innerHTML = `<tr><td colspan="3" class="muted">Error: ${esc(r.error||'gagal memuat')}</td></tr>`; return; }
-  $('rosBody').innerHTML = (r.data||[]).map(x=>`<tr><td>${esc(x[0]||'')}</td><td>${esc(x[1]||'')}</td><td>${esc(x[4]||'')}</td></tr>`).join('');
+  const r=await getJSON({action:'roster',kelas,onlyActive:String(only)});
+  if(!r.ok){ $('rosBody').innerHTML=`<tr><td colspan="3" class="muted">Error: ${esc(r.error||'gagal memuat')}</td></tr>`; return; }
+  $('rosBody').innerHTML=(r.data||[]).map(x=>`<tr><td>${esc(x[0]||'')}</td><td>${esc(x[1]||'')}</td><td>${esc(x[4]||'')}</td></tr>`).join('');
 }
 $('rosKelas').onchange=refreshRoster; $('rosOnly').onchange=refreshRoster;
 
-/* ======= ABSENSI ======= */
-$('btnAbsen').onclick = async ()=>{
+/* ===== ABSENSI ===== */
+$('btnAbsen').onclick=async ()=>{
   const kelas=$('absKelas').value, tglISO=$('absTgl').value;
   if(!kelas || !tglISO) return;
   $('btnAbsen').disabled=true; $('absRes').textContent='Membuat template...';
-  const r = await getJSON({action:'prepareAbsensi', kelas, tglISO});
+  const r=await getJSON({action:'prepareAbsensi',kelas,tglISO});
   $('btnAbsen').disabled=false; $('absRes').textContent = r.ok? `Template dibuat untuk ${esc(kelas)} (${esc(tglISO)})` : ('Error: '+esc(r.error));
 };
 
-/* ======= RESUME ======= */
+/* ===== RESUME ===== */
 async function refreshResume(){
   const kelas=$('sumKelas').value, periode=$('sumPeriode').value, only=$('sumOnly').value==='true';
-  const r = await getJSON({action:'kelasResume', kelas, periode, onlyActive:String(only)});
-  if (r.ok && r.data){ $('sumSiswa').textContent=r.data.siswaAktif; $('sumSPP').textContent=r.data.totalSPPLabel; }
+  const r=await getJSON({action:'kelasResume',kelas,periode,onlyActive:String(only)});
+  if(r.ok && r.data){ $('sumSiswa').textContent=r.data.siswaAktif; $('sumSPP').textContent=r.data.totalSPPLabel; }
 }
 ['sumKelas','sumPeriode','sumOnly'].forEach(id=> $(id).onchange=refreshResume);
 </script>
