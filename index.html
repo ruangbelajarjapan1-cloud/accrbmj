@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>RBMJ Portal (Web)</title>
 <style>
-:root{--bg:#f8fafc;--card:#fff;--line:#e5e7eb;--text:#111827;--muted:#6b7280;--primary:#2563eb;}
+:root{--bg:#f8fafc;--card:#fff;--line:#e5e7eb;--text:#111827;--muted:#6b7280;--primary:#2563eb}
 *{box-sizing:border-box;font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif}
 body{margin:0;background:var(--bg);color:var(--text)}
 .wrap{max-width:980px;margin:0 auto;padding:12px}
@@ -149,12 +149,12 @@ textarea{min-height:80px}
     </div>
   </div>
 
-  <div class="banner" id="netErr">Tidak bisa menjangkau API. Coba matikan VPN/Private DNS/ad-blocker untuk domain googleusercontent.com lalu reload.</div>
+  <div class="banner" id="netErr">Tidak bisa menjangkau API. Coba nonaktifkan VPN/Private DNS/ad-blocker untuk domain Google, lalu reload.</div>
 </div>
 
 <script>
 /* ======= KONFIG ======= */
-const GAS_BASE = 'https://script.google.com/macros/s/AKfycbwKh033sPydZWdtw4Iv4wX7d-VQUa10tqbtJP8FyvPEe6gB7_mJxJ6qBHlX94aacSAz/exec'; // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+const GAS_BASE = 'https://script.google.com/macros/s/AKfycbwKh033sPydZWdtw4Iv4wX7d-VQUa10tqbtJP8FyvPEe6gB7_mJxJ6qBHlX94aacSAz/exec'; // <<<<<<<<<<<<<< set ke URL /exec
 
 /* ======= UTILS ======= */
 const $ = id => document.getElementById(id);
@@ -191,7 +191,6 @@ document.querySelectorAll('.tab').forEach(b=>{
 
 /* ======= INIT ======= */
 (async function init(){
-  // brand
   try{
     const br = await getJSON({action:'brand'});
     if (br.ok && br.data){
@@ -201,7 +200,6 @@ document.querySelectorAll('.tab').forEach(b=>{
     }
   }catch(_){}
 
-  // kelas & metode
   const kls = await getJSON({action:'listKelas'});
   const metode = await getJSON({action:'listMetode'});
   const setOpts = (sel, arr, map=v=>({value:v,label:v}))=>{
@@ -210,7 +208,6 @@ document.querySelectorAll('.tab').forEach(b=>{
   ['payKelas','invKelas','rosKelas','absKelas','sumKelas'].forEach(id=> setOpts($(id), kls.data||[]));
   setOpts($('payMetode'), metode.data||[]);
 
-  // default tanggal
   const now = new Date(), ym = now.toISOString().slice(0,7);
   ['payPeriode','invPeriode','sumPeriode','mukPeriode'].forEach(id=> $(id).value = ym);
   $('invJt').value = new Date(Date.now()+7*24*3600*1000).toISOString().slice(0,10);
@@ -338,6 +335,7 @@ $('btnMukBayar').onclick = async ()=>{
 async function refreshRoster(){
   const kelas=$('rosKelas').value, only=$('rosOnly').value==='true';
   const r = await getJSON({action:'roster', kelas, onlyActive:String(only)});
+  if (!r.ok) { $('rosBody').innerHTML = `<tr><td colspan="3" class="muted">Error: ${esc(r.error||'gagal memuat')}</td></tr>`; return; }
   $('rosBody').innerHTML = (r.data||[]).map(x=>`<tr><td>${esc(x[0]||'')}</td><td>${esc(x[1]||'')}</td><td>${esc(x[4]||'')}</td></tr>`).join('');
 }
 $('rosKelas').onchange=refreshRoster; $('rosOnly').onchange=refreshRoster;
