@@ -29,10 +29,12 @@ input,select,textarea{width:100%;padding:8px;border:1px solid var(--line);border
 .tiny{font-size:12px}.muted{color:var(--muted)}.mt8{margin-top:8px}
 .right{text-align:right}
 </style>
+
+<!-- GANTI dgn URL Web App (Deploy → Web App → Anyone with the link) -->
 <script>
-  // GANTI dgn URL Web App Apps Script (Deploy → Web App → Anyone with the link)
   window.RBMJ_API_BASE = 'https://script.google.com/macros/s/AKfycbwco6CwAo-n1gjErTBcwZitYnL_oLR_jW2Em9eGw_us6V6pRiwFcv97Giy17K_Ov3GS/exec';
-  window.RBMJ_LOGO_URL = 'logo.png'; 
+  // Pakai logo repo (prioritas), fallback ke logo dari sheet Brand (Apps Script):
+  window.RBMJ_LOGO_URL = 'logo.png';
 </script>
 </head>
 <body>
@@ -167,18 +169,18 @@ document.querySelectorAll('.tab').forEach(btn=>{
   });
 });
 
-/* Branding */
+/* Branding (FIXED try/catch) */
 (async function(){
   try{
     const b = await apiGet({action:'brand'});
-if (b?.name) $('brandTitle').textContent = b.name;
-if (b?.tagline) $('brandTagline').textContent = b.tagline;
+    if (b?.name) $('brandTitle').textContent = b.name;
+    if (b?.tagline) $('brandTagline').textContent = b.tagline;
 
-const forced = window.RBMJ_LOGO_URL;                  // <-- tambahkan
-const url = forced || (b && b.logoUrl);               // prioritas ke file repo
-if (url) { $('brandLogo').src = url; }
-else { $('brandLogo').style.display = 'none'; }
-catch(_){}
+    const forced = window.RBMJ_LOGO_URL;
+    const url = forced || (b && b.logoUrl);
+    if (url) { $('brandLogo').src = url; }
+    else { $('brandLogo').style.display = 'none'; }
+  } catch(_){}
 })();
 
 /* shared loaders */
@@ -223,7 +225,7 @@ $('btnPay').addEventListener('click', async ()=>{
   }catch(e){ $('payInfo').textContent='Error: '+e.message; }
 });
 
-/* Riwayat per NIS (popup sederhana di halaman) */
+/* Riwayat per NIS */
 $('btnHist').addEventListener('click', async ()=>{
   const nis=$('payNis').value, prd=$('payPeriode').value;
   if(!nis){ $('payHistBox').innerHTML=''; return; }
