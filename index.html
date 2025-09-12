@@ -32,12 +32,13 @@ input,select,textarea{width:100%;padding:8px;border:1px solid var(--line);border
 <script>
   // GANTI dgn URL Web App Apps Script (Deploy → Web App → Anyone with the link)
   window.RBMJ_API_BASE = 'https://script.google.com/macros/s/AKfycbwco6CwAo-n1gjErTBcwZitYnL_oLR_jW2Em9eGw_us6V6pRiwFcv97Giy17K_Ov3GS/exec';
+  window.RBMJ_LOGO_URL = 'logo.png'; 
 </script>
 </head>
 <body>
 <div class="wrap">
   <div class="brand">
-    <img id="brandLogo" alt="logo.png"/>
+    <img id="brandLogo" alt="RBM Jepang"/>
     <div>
       <div id="brandTitle" class="brand-name">Ruang Belajar Muslim Jepang</div>
       <div id="brandTagline" class="brand-tagline"></div>
@@ -170,10 +171,14 @@ document.querySelectorAll('.tab').forEach(btn=>{
 (async function(){
   try{
     const b = await apiGet({action:'brand'});
-    if (b?.name) $('brandTitle').textContent = b.name;
-    if (b?.tagline) $('brandTagline').textContent = b.tagline;
-    if (b?.logoUrl) $('brandLogo').src = b.logoUrl; else $('brandLogo').style.display='none';
-  }catch(_){}
+if (b?.name) $('brandTitle').textContent = b.name;
+if (b?.tagline) $('brandTagline').textContent = b.tagline;
+
+const forced = window.RBMJ_LOGO_URL;                  // <-- tambahkan
+const url = forced || (b && b.logoUrl);               // prioritas ke file repo
+if (url) { $('brandLogo').src = url; }
+else { $('brandLogo').style.display = 'none'; }
+catch(_){}
 })();
 
 /* shared loaders */
