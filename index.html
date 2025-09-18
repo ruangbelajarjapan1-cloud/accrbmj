@@ -1,388 +1,133 @@
-<!DOCTYPE html>
-<html lang="id">
+<!doctype html>
+<html>
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>RBMJ Portal (Web)</title>
-<style>
-:root{--bg:#f8fafc;--card:#fff;--line:#e5e7eb;--text:#111827;--muted:#6b7280;--primary:#2563eb}
-*{box-sizing:border-box;font-family:system-ui,Segoe UI,Inter,Arial,sans-serif}
-body{margin:0;background:var(--bg);color:var(--text)}
-.wrap{max-width:980px;margin:auto;padding:18px}
-.brand{display:flex;gap:12px;align-items:center;margin-bottom:10px}
-.brand img{height:44px;max-width:120px;object-fit:contain;border-radius:8px}
-.brand-name{font-size:18px;font-weight:600}
-.brand-tagline{font-size:12px;color:var(--muted)}
-.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}
-.tab{padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;cursor:pointer;font-size:13px}
-.tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
-.row{display:grid;grid-template-columns:140px 1fr;gap:8px;margin-bottom:10px;align-items:center}
-label{font-size:12px;color:var(--muted)}
-input,select,textarea{width:100%;padding:8px;border:1px solid var(--line);border-radius:8px;background:#fff}
-.btn{display:inline-flex;gap:8px;align-items:center;padding:8px 12px;border-radius:10px;border:1px solid var(--primary);background:var(--primary);color:#fff;cursor:pointer}
-.btn.secondary{background:#fff;color:var(--primary)}
-.btn:disabled{opacity:.6;cursor:not-allowed}
-.grid{width:100%;border-collapse:collapse;margin-top:8px;font-size:12px}
-.grid th,.grid td{border:1px solid var(--line);padding:6px}
-.grid th{background:#f3f4f6;text-align:left}
-.tiny{font-size:12px}.muted{color:var(--muted)}.mt8{margin-top:8px}
-.right{text-align:right}
-</style>
-
-<!-- GANTI dgn URL Web App (Deploy → Web App → Anyone with the link) -->
-<script>
-  window.RBMJ_API_BASE = 'https://script.google.com/macros/s/AKfycbwLajZgkwlchFDQL_KOV0vfgnYHqTXpHGw-EoEq5_KN3-42EoLlijXZR99xL9-V4ntS/exec';
-  // Pakai logo repo (prioritas), fallback ke logo dari sheet Brand (Apps Script):
-  window.RBMJ_LOGO_URL = 'logo.png';
-</script>
+  <meta charset="utf-8">
+  <title>RBMJepang</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body{font-family:system-ui,Arial,sans-serif;max-width:900px;margin:20px auto;padding:0 12px;background:#f6f7fb}
+    h1{font-size:22px}
+    label{display:block;margin:8px 0 4px;font-size:12px;color:#555}
+    input,select,button{padding:10px;border:1px solid #ddd;border-radius:10px}
+    input,select{width:100%}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .card{border:1px solid #eee;border-radius:14px;padding:12px;margin:10px 0;background:#fff}
+    button{background:#111827;color:#fff;border:0;border-radius:12px;cursor:pointer}
+    small{color:#666}
+    a.btn{display:inline-block;padding:10px 12px;border-radius:10px;background:#0ea5e9;color:#fff;text-decoration:none}
+  </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="brand">
-    <img id="brandLogo" alt="RBM Jepang"/>
-    <div>
-      <div id="brandTitle" class="brand-name">Ruang Belajar Muslim Jepang</div>
-      <div id="brandTagline" class="brand-tagline"></div>
+  <h1>RBMJepang</h1>
+
+  <div class="card">
+    <h3>Pembayaran & Kwitansi</h3>
+    <div class="row">
+      <div>
+        <label>Tanggal</label>
+        <input id="tgl" type="date">
+      </div>
+      <div>
+        <label>Kelas</label>
+        <select id="kelas"></select>
+      </div>
     </div>
-  </div>
-
-  <div class="tabs">
-    <button class="tab active" data-tab="pay">Pembayaran SPP</button>
-    <button class="tab" data-tab="inv">Surat/Invoice</button>
-    <button class="tab" data-tab="out">Pengeluaran</button>
-    <button class="tab" data-tab="muk">Mukafaah</button>
-    <button class="tab" data-tab="ros">Roster</button>
-    <button class="tab" data-tab="abs">Absensi</button>
-    <button class="tab" data-tab="sum">Resume</button>
-  </div>
-
-  <!-- ===== Pembayaran ===== -->
-  <div class="card" id="tab-pay">
-    <div class="row"><label>Kelas</label><select id="payKelas"></select></div>
-    <div class="row"><label>Hanya Aktif?</label><select id="payOnly"><option value="true" selected>Ya</option><option value="false">Tidak</option></select></div>
-    <div class="row"><label>Siswa</label><select id="payNis"></select></div>
-    <div class="row"><label>Periode</label><input id="payPeriode" placeholder="YYYY-MM"></div>
-    <div class="row"><label>Metode</label><select id="payMetode"></select></div>
-    <div class="row"><label>Nominal</label><input id="payNominal" class="right" placeholder="otomatis"></div>
-    <div class="row"><label>Keterangan</label><input id="payKet" placeholder="opsional"></div>
-    <div class="mt8">
-      <button class="btn" id="btnPay">Simpan & Kwitansi</button>
-      <button class="btn secondary" id="btnHist">Riwayat per NIS</button>
+    <div class="row">
+      <div>
+        <label>Siswa</label>
+        <select id="siswa"></select>
+      </div>
+      <div>
+        <label>Item</label>
+        <input id="item" value="SPP">
+      </div>
     </div>
-    <div id="payInfo" class="tiny muted mt8"></div>
-    <div id="payHistBox" class="mt8"></div>
-  </div>
-
-  <!-- ===== Surat/Invoice ===== -->
-  <div class="card" id="tab-inv" style="display:none">
-    <div class="row"><label>Kelas</label><select id="invKelas"></select></div>
-    <div class="row"><label>Hanya Aktif?</label><select id="invOnly"><option value="true" selected>Ya</option><option value="false">Tidak</option></select></div>
-    <div class="row"><label>Siswa</label><select id="invNis"></select></div>
-    <div class="row"><label>Periode</label><input id="invPeriode" placeholder="YYYY-MM"></div>
-    <div class="row"><label>Jumlah</label><input id="invJumlah" class="right" placeholder="otomatis"></div>
-    <div class="row"><label>Jatuh Tempo</label><input id="invJt" type="date"></div>
-    <button class="btn" id="btnInvoice">Buat Surat/Invoice (PDF)</button>
-    <div id="invInfo" class="tiny muted mt8"></div>
-  </div>
-
-  <!-- ===== Pengeluaran ===== -->
-  <div class="card" id="tab-out" style="display:none">
-    <div class="row"><label>Tanggal</label><input type="date" id="outTgl"></div>
-    <div class="row"><label>Kategori</label><input id="outKat" placeholder="Operasional"></div>
-    <div class="row"><label>Deskripsi</label><input id="outDesk"></div>
-    <div class="row"><label>Nominal</label><input id="outNom" class="right"></div>
-    <div class="row"><label>Dibayar Oleh</label><input id="outBy"></div>
-    <button class="btn" id="btnOut">Simpan</button>
-    <div id="outInfo" class="tiny muted mt8"></div>
-  </div>
-
-  <!-- ===== Mukafaah ===== -->
-  <div class="card" id="tab-muk" style="display:none">
-    <div class="row"><label>Periode</label><input id="mukPeriode" placeholder="YYYY-MM"></div>
-    <div class="mt8">
-      <button class="btn" id="btnMukHitung">Hitung Bulan</button>
-      <button class="btn secondary" id="btnMukBayar">Bayar Semua</button>
-      <button class="btn secondary" id="btnMukSlip">Cetak Slip per Kelas</button>
+    <div class="row">
+      <div>
+        <label>Nominal</label>
+        <input id="nominal" type="number" min="0">
+        <small id="hint"></small>
+      </div>
+      <div>
+        <label>Metode</label>
+        <select id="metode"><option>Tunai</option><option>Transfer</option></select>
+      </div>
     </div>
-    <div class="row mt8"><label>Kelas (Slip)</label><select id="mukKelas"></select></div>
-    <div class="row"><label>Tanggal Bayar</label><input type="date" id="mukTgl"></div>
-    <div class="row"><label>Dibayar Oleh</label><input id="mukBy" placeholder="-"></div>
-    <div class="row"><label>Metode</label><input id="mukMetode" placeholder="Tunai/Transfer"></div>
-    <div id="mukInfo" class="tiny muted mt8"></div>
-  </div>
-
-  <!-- ===== Roster ===== -->
-  <div class="card" id="tab-ros" style="display:none">
-    <div class="row"><label>Kelas</label><select id="rosKelas"></select></div>
-    <div class="row"><label>Hanya Aktif?</label><select id="rosOnly"><option value="true" selected>Ya</option><option value="false">Tidak</option></select></div>
-    <table class="grid" id="rosTable"><thead><tr><th>NIS</th><th>Nama</th></tr></thead><tbody></tbody></table>
-  </div>
-
-  <!-- ===== Absensi (editable) ===== -->
-  <div class="card" id="tab-abs" style="display:none">
-    <div class="row"><label>Kelas</label><select id="absKelas"></select></div>
-    <div class="row"><label>Tanggal</label><input id="absTanggal" type="date"></div>
-    <div class="mt8">
-      <button class="btn" id="btnAbsen">Buat Template Absensi</button>
-      <button class="btn secondary" id="btnShareWA" disabled>Bagikan via WhatsApp</button>
+    <label>Catatan</label>
+    <input id="catatan">
+    <div class="row">
+      <button id="btnSave">Simpan & Buat Kwitansi</button>
+      <a id="waLink" class="btn" target="_blank">WhatsApp</a>
     </div>
-    <div id="absInfo" class="tiny muted mt8"></div>
-    <table class="grid mt8" id="absTable" style="display:none">
-      <thead><tr><th style="width:90px">NIS</th><th>Nama</th><th style="width:140px">Kehadiran</th><th>Keterangan</th></tr></thead>
-      <tbody></tbody>
-    </table>
+    <div id="out" style="margin-top:8px;color:#666"></div>
   </div>
-
-  <!-- ===== Resume ===== -->
-  <div class="card" id="tab-sum" style="display:none">
-    <div class="row"><label>Kelas</label><select id="sumKelas"></select></div>
-    <div class="row"><label>Periode</label><input id="sumPeriode" placeholder="YYYY-MM"></div>
-    <div class="row"><label>Hanya Aktif?</label><select id="sumOnly"><option value="true" selected>Ya</option><option value="false">Tidak</option></select></div>
-    <table class="grid"><tbody><tr><th>Jumlah Siswa</th><td id="sumSiswa">-</td></tr><tr><th>Total SPP</th><td id="sumSPP">-</td></tr></tbody></table>
-  </div>
-</div>
 
 <script>
-const API_BASE = window.RBMJ_API_BASE;
-const $ = (id)=>document.getElementById(id);
-function html(s){return String(s).replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;' }[m]))}
-async function apiGet(params){
-  const url = new URL(API_BASE);
-  Object.entries(params).forEach(([k,v])=> url.searchParams.set(k,v));
-  const r = await fetch(url.toString(), {cache:'no-store'});
-  if (!r.ok) throw new Error('HTTP '+r.status);
-  const j = await r.json();
-  if (!j.ok) throw new Error(j.error||'API error');
-  return j.data;
+const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbz8InhGRUZvYvmMH0NrPvwRnt12eeuHyd50W59scrmCBfEUQfLEwb2HLM-5lOsqQ_Fx/exec'; 
+
+function q(s){return document.querySelector(s);}
+
+async function api(action, payload={}, method='POST'){
+  const url = BACKEND_URL + '?action=' + encodeURIComponent(action);
+  const opt = (method==='GET')
+    ? { method:'GET' }
+    : { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) };
+  const res = await fetch(url, opt);
+  const json = await res.json();
+  if(!json.ok) throw new Error(json.error||'API error');
+  return json.data;
 }
 
-/* Tabs */
-document.querySelectorAll('.tab').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    const id = btn.dataset.tab;
-    ['pay','inv','out','muk','ros','abs','sum'].forEach(t=>{
-      $('tab-'+t).style.display = (t===id)?'block':'none';
-    });
-  });
-});
-
-/* Branding (FIXED try/catch) */
-(async function(){
-  try{
-    const b = await apiGet({action:'brand'});
-    if (b?.name) $('brandTitle').textContent = b.name;
-    if (b?.tagline) $('brandTagline').textContent = b.tagline;
-
-    const forced = window.RBMJ_LOGO_URL;
-    const url = forced || (b && b.logoUrl);
-    if (url) { $('brandLogo').src = url; }
-    else { $('brandLogo').style.display = 'none'; }
-  } catch(_){}
-})();
-
-/* shared loaders */
-async function loadKelas(ids){
-  const list = await apiGet({action:'listKelas'});
-  ids.forEach(id=>{ $(id).innerHTML = list.map(v=>`<option value="${html(v)}">${html(v)}</option>`).join(''); });
+async function loadKelas(){
+  const data = await api('list_kelas', {}, 'GET');
+  const sel = q('#kelas'); sel.innerHTML='';
+  data.forEach(k => sel.add(new Option(k.nama, k.id)));
+  await loadSiswaByKelas(sel.value);
 }
-async function loadMetode(){
-  const m = await apiGet({action:'listMetode'});
-  $('payMetode').innerHTML = m.map(v=>`<option value="${html(v)}">${html(v)}</option>`).join('');
+async function loadSiswaByKelas(kelasId){
+  const data = await api('list_siswa_by_kelas', {kelas_id:kelasId}, 'GET');
+  const sel = q('#siswa'); sel.innerHTML='';
+  data.forEach(s => sel.add(new Option(s.nama, s.id)));
+  tryPreviewSPP();
 }
+q('#kelas').addEventListener('change', e => loadSiswaByKelas(e.target.value));
 
-/* Pembayaran */
-async function refreshPayStudents(){
-  const kelas=$('payKelas').value, only=$('payOnly').value==='true';
-  const rows = await apiGet({action:'listSiswaByKelas', kelas, onlyActive:String(only)});
-  $('payNis').innerHTML = rows.map(r=>`<option value="${html(r.nis)}">${html(r.nis+' — '+r.nama)}</option>`).join('');
-  if (rows.length){
-    const n = await apiGet({action:'computeTarif', nis:rows[0].nis, periode:$('payPeriode').value, kelas});
-    $('payNominal').value = n;
-  } else $('payNominal').value='';
+async function tryPreviewSPP(){
+  const kelas_id = q('#kelas').value;
+  const siswa_id = q('#siswa').value;
+  if(!kelas_id || !siswa_id) return;
+  const r = await api('spp_preview', {kelas_id, siswa_id}, 'GET');
+  q('#nominal').value = r.nominal || '';
+  q('#hint').textContent = r.tarif ? `Tarif: ¥${Number(r.tarif).toLocaleString()} → Bayar: ¥${Number(r.nominal).toLocaleString()}` : '';
 }
-$('payKelas').addEventListener('change', refreshPayStudents);
-$('payOnly').addEventListener('change', refreshPayStudents);
-$('payNis').addEventListener('change', async ()=>{
-  if (!$('payNis').value) return;
-  const n = await apiGet({action:'computeTarif', nis:$('payNis').value, periode:$('payPeriode').value, kelas:$('payKelas').value});
-  $('payNominal').value = n;
-});
-$('payPeriode').addEventListener('change', async ()=>{
-  if (!$('payNis').value) return;
-  const n = await apiGet({action:'computeTarif', nis:$('payNis').value, periode:$('payPeriode').value, kelas:$('payKelas').value});
-  $('payNominal').value = n;
-});
-$('btnPay').addEventListener('click', async ()=>{
-  const nis=$('payNis').value, prd=$('payPeriode').value, n=$('payNominal').value, m=$('payMetode').value, k=$('payKet').value, kelas=$('payKelas').value;
-  if(!nis||!prd||!n){ $('payInfo').textContent='Lengkapi data.'; return; }
-  $('payInfo').textContent='Menyimpan...';
+['#siswa','#kelas','#item'].forEach(id => q(id).addEventListener('change', tryPreviewSPP));
+
+q('#tgl').value = new Date().toISOString().slice(0,10);
+
+q('#btnSave').addEventListener('click', async () => {
   try{
-    const url = await apiGet({action:'createPayment', nis, periode:prd, nominal:n, metode:m, ket:k, kelas});
-    $('payInfo').innerHTML = `Berhasil. <a target="_blank" href="${url}">Buka Kwitansi PDF</a>`;
-  }catch(e){ $('payInfo').textContent='Error: '+e.message; }
+    const tanggal = q('#tgl').value;
+    const payload = {
+      tanggal,
+      periode: (tanggal||'').slice(0,7),
+      kelas_id: q('#kelas').value,
+      siswa_id: q('#siswa').value,
+      item: q('#item').value,
+      nominal: q('#nominal').value,
+      metode: q('#metode').value,
+      catatan: q('#catatan').value
+    };
+    const saved = await api('save_pembayaran', payload, 'POST');
+    const doc = await api('generate_kwitansi', { pembayaran_id: saved.id }, 'POST');
+    q('#out').innerHTML = `<a href="${doc.url}" target="_blank">Buka Kwitansi PDF</a>`;
+    q('#waLink').href = doc.wa;
+  }catch(e){
+    alert(e.message||e);
+  }
 });
 
-/* Riwayat per NIS */
-$('btnHist').addEventListener('click', async ()=>{
-  const nis=$('payNis').value, prd=$('payPeriode').value;
-  if(!nis){ $('payHistBox').innerHTML=''; return; }
-  const rows = await apiGet({action:'paymentHistory', nis, periode:prd});
-  if(!rows.length){ $('payHistBox').innerHTML='<div class="tiny muted">Belum ada pembayaran di periode ini.</div>'; return; }
-  const htmlRows = rows.map(r=>`<tr><td>${r.tanggal}</td><td>${html(r.periode)}</td><td class="right">${Number(r.nominal).toLocaleString('id-ID')}</td><td>${html(r.metode||'')}</td><td>${html(r.ket||'')}</td><td>${html(r.kwitansi||'')}</td></tr>`).join('');
-  $('payHistBox').innerHTML = `
-    <table class="grid"><thead><tr><th>Tanggal</th><th>Periode</th><th>Nominal</th><th>Metode</th><th>Keterangan</th><th>No</th></tr></thead>
-    <tbody>${htmlRows}</tbody></table>`;
-});
-
-/* Invoice */
-async function refreshInvStudents(){
-  const kelas=$('invKelas').value, only=$('invOnly').value==='true';
-  const rows = await apiGet({action:'listSiswaByKelas', kelas, onlyActive:String(only)});
-  $('invNis').innerHTML = rows.map(r=>`<option value="${html(r.nis)}">${html(r.nis+' — '+r.nama)}</option>`).join('');
-  if (rows.length){
-    const n = await apiGet({action:'computeTarif', nis:rows[0].nis, periode:$('invPeriode').value, kelas});
-    $('invJumlah').value = n;
-  } else $('invJumlah').value='';
-}
-['invKelas','invOnly'].forEach(id=> $(id).addEventListener('change', refreshInvStudents));
-['invNis','invPeriode'].forEach(id=> $(id).addEventListener('change', async ()=>{
-  if (!$('invNis').value) return;
-  const n = await apiGet({action:'computeTarif', nis:$('invNis').value, periode:$('invPeriode').value, kelas:$('invKelas').value});
-  $('invJumlah').value = n;
-}));
-$('btnInvoice').addEventListener('click', async ()=>{
-  const nis=$('invNis').value, prd=$('invPeriode').value, j=$('invJumlah').value, jt=$('invJt').value, kelas=$('invKelas').value;
-  if(!nis||!prd||!j||!jt){ $('invInfo').textContent='Lengkapi data.'; return; }
-  $('invInfo').textContent='Membuat PDF...';
-  try{
-    const url = await apiGet({action:'createInvoice', nis, periode:prd, jumlah:j, jtISO:jt, kelas});
-    $('invInfo').innerHTML = `Berhasil. <a target="_blank" href="${url}">Buka Surat/Invoice PDF</a>`;
-  }catch(e){ $('invInfo').textContent='Error: '+e.message; }
-});
-
-/* Pengeluaran */
-$('btnOut').addEventListener('click', async ()=>{
-  const t=$('outTgl').value, kat=$('outKat').value, desk=$('outDesk').value, n=$('outNom').value, by=$('outBy').value;
-  if(!t||!kat||!desk||!n){ $('outInfo').textContent='Lengkapi data.'; return; }
-  $('outInfo').textContent='Menyimpan...';
-  try{
-    const r = await apiGet({action:'addExpense', tglISO:t, kategori:kat, deskripsi:desk, nominal:n, by});
-    $('outInfo').textContent='OK. ID: '+r.id;
-  }catch(e){ $('outInfo').textContent='Error: '+e.message; }
-});
-
-/* Roster */
-async function refreshRoster(){
-  const kelas=$('rosKelas').value, only=$('rosOnly').value==='true';
-  const rows = await apiGet({action:'roster', kelas, onlyActive:String(only)});
-  $('rosTable').querySelector('tbody').innerHTML = rows.map(r=>`<tr><td>${html(r[0])}</td><td>${html(r[1])}</td></tr>`).join('');
-}
-['rosKelas','rosOnly'].forEach(id=> $(id).addEventListener('change', refreshRoster));
-
-/* Absensi */
-const KEH_OPTS = ['Hadir','Izin','Sakit','Alfa'];
-async function fetchAbsensi(){
-  $('absInfo').textContent='Memuat...'; $('absTable').style.display='none';
-  const kelas=$('absKelas').value, tgl=$('absTanggal').value; if(!kelas||!tgl) return;
-  try{
-    const rows = await apiGet({action:'absensiList', kelas, tglISO:tgl});
-    const tb = $('absTable').querySelector('tbody');
-    tb.innerHTML = rows.map(r=>{
-      const opts=KEH_OPTS.map(k=>`<option value="${k}" ${k===r.kehadiran?'selected':''}>${k}</option>`).join('');
-      return `<tr data-nis="${html(r.nis)}">
-        <td>${html(r.nis)}</td>
-        <td>${html(r.nama)}</td>
-        <td><select class="kehSel">${opts}</select></td>
-        <td><input class="ketInp" value="${html(r.ket||'')}"/></td>
-      </tr>`;
-    }).join('');
-    $('absTable').style.display='';
-    $('absInfo').textContent=`OK. ${rows.length} baris untuk ${kelas} / ${tgl}.`;
-    $('btnShareWA').disabled = rows.length===0;
-  }catch(e){ $('absInfo').textContent='Error: '+e.message; }
-}
-$('btnAbsen').addEventListener('click', async ()=>{
-  const kelas=$('absKelas').value, tgl=$('absTanggal').value; if(!kelas||!tgl) return;
-  $('absInfo').textContent='Membuat template...';
-  try{
-    await apiGet({action:'prepareAbsensi', kelas, tglISO:tgl});
-    $('absInfo').textContent='Template dibuat. Memuat daftar...';
-    await fetchAbsensi();
-  }catch(e){ $('absInfo').textContent='Error: '+e.message; }
-});
-['absKelas','absTanggal'].forEach(id=> $(id).addEventListener('change', fetchAbsensi));
-
-/* Inline update (kehadiran/ket) */
-$('absTable').addEventListener('change', async (ev)=>{
-  const tr = ev.target.closest('tr'); if (!tr) return;
-  const nis = tr.dataset.nis, kelas=$('absKelas').value, tgl=$('absTanggal').value;
-  const keh = tr.querySelector('.kehSel').value;
-  const ket = tr.querySelector('.ketInp').value;
-  try{
-    await apiGet({action:'absensiUpdate', kelas, tglISO:tgl, nis, kehadiran:keh, ket});
-    $('absInfo').textContent='Tersimpan.';
-  }catch(e){ $('absInfo').textContent='Error simpan: '+e.message; }
-});
-
-/* Share WA */
-$('btnShareWA').addEventListener('click', async ()=>{
-  const kelas=$('absKelas').value, tgl=$('absTanggal').value;
-  const rows = await apiGet({action:'absensiList', kelas, tglISO:tgl});
-  const counts = rows.reduce((m,r)=>{m[r.kehadiran]=(m[r.kehadiran]||0)+1;return m;},{});
-  const non = rows.filter(r=>r.kehadiran!=='Hadir');
-  let msg=`Absensi ${kelas}\n${tgl}\n\nRingkasan:\n`; Object.keys(counts).sort().forEach(k=> msg+=`• ${k}: ${counts[k]}\n`);
-  if (non.length){ msg+=`\nTidak Hadir / Izin / Sakit:\n`; non.forEach(r=> msg+=`- ${r.nama} (${r.kehadiran}${r.ket?` — ${r.ket}`:''})\n`); }
-  const wa = 'https://wa.me/?text='+encodeURIComponent(msg);
-  window.open(wa,'_blank');
-});
-
-/* Mukafaah */
-$('btnMukHitung').addEventListener('click', async ()=>{
-  const prd=$('mukPeriode').value; if(!prd) return;
-  $('mukInfo').textContent='Menghitung...';
-  try{
-    const r = await apiGet({action:'mukHitung', periode:prd});
-    $('mukInfo').textContent=`Kelas: ${r.count}, Total SPP: Rp${Number(r.totalSPP).toLocaleString('id-ID')}, Mukafaah: Rp${Number(r.totalMuk).toLocaleString('id-ID')}`;
-  }catch(e){ $('mukInfo').textContent='Error: '+e.message; }
-});
-$('btnMukBayar').addEventListener('click', async ()=>{
-  const prd=$('mukPeriode').value, tgl=$('mukTgl').value, by=$('mukBy').value, metode=$('mukMetode').value;
-  if(!prd||!tgl){ $('mukInfo').textContent='Isi periode & tanggal bayar.'; return; }
-  $('mukInfo').textContent='Membayar...';
-  try{
-    const r = await apiGet({action:'mukBayarAll', periode:prd, tglISO:tgl, by, metode});
-    $('mukInfo').textContent=`Slip terbayar: ${r.paidCount}, Total: Rp${Number(r.totalMuk).toLocaleString('id-ID')}`;
-  }catch(e){ $('mukInfo').textContent='Error: '+e.message; }
-});
-$('btnMukSlip').addEventListener('click', async ()=>{
-  const prd=$('mukPeriode').value, kelas=$('mukKelas').value; if(!prd||!kelas){ $('mukInfo').textContent='Isi periode & pilih kelas.'; return; }
-  $('mukInfo').textContent='Membuat slip...';
-  try{
-    const url = await apiGet({action:'mukSlip', periode:prd, kelas});
-    $('mukInfo').innerHTML=`Slip: <a target="_blank" href="${url}">${html(url)}</a>`;
-  }catch(e){ $('mukInfo').textContent='Error: '+e.message; }
-});
-
-/* Resume */
-async function refreshResume(){
-  const kelas=$('sumKelas').value, prd=$('sumPeriode').value, only=$('sumOnly').value==='true';
-  const r = await apiGet({action:'kelasResume', kelas, periode:prd, onlyActive:String(only)});
-  $('sumSiswa').textContent = r.siswaAktif; $('sumSPP').textContent = r.totalSPPLabel;
-}
-['sumKelas','sumPeriode','sumOnly'].forEach(id=> $(id).addEventListener('change', refreshResume));
-
-/* Init */
-(async function init(){
-  const today = new Date(); const iso = new Date(today.getTime()-today.getTimezoneOffset()*60000).toISOString().slice(0,10);
-  const ym = iso.slice(0,7);
-  $('absTanggal').value = iso; $('invJt').value = iso; $('payPeriode').value = ym; $('invPeriode').value = ym; $('mukPeriode').value = ym; $('sumPeriode').value = ym;
-  await loadKelas(['payKelas','invKelas','rosKelas','absKelas','sumKelas','mukKelas']);
-  await loadMetode();
-  await refreshPayStudents(); await refreshInvStudents(); await refreshRoster(); await fetchAbsensi(); await refreshResume();
-})();
+// start
+loadKelas();
 </script>
 </body>
 </html>
