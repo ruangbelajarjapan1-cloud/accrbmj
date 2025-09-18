@@ -26,7 +26,8 @@
 </head>
 <body>
 <header>
-  <img id="logo" alt="logo"/>
+  <!-- Fallback: logo di repo GitHub -->
+  <img id="logo" src="./logo.png" alt="logo"/>
   <h1>RBMJepang</h1>
 </header>
 
@@ -79,7 +80,7 @@
   </div>
 </section>
 
-<!-- PENGELUARAN (placeholder) -->
+<!-- PENGELUARAN (placeholder: sambungkan bila perlu) -->
 <section id="pengeluaran" class="card hidden">
   <div class="muted">Form Pengeluaran belum dihubungkan ke API (sama seperti WebApp-mu sekarang). Tambah endpoint lalu sambungkan jika diperlukan.</div>
 </section>
@@ -150,11 +151,9 @@
 </section>
 
 <script>
-const BACKEND_URL = 'PASTE_WEB_APP_URL_DI_SINI'; // <-- ganti
+const BACKEND_URL = 'PASTE_WEB_APP_URL_DI_SINI'; // <-- ganti dengan URL Web App Apps Script kamu
 
 function $(id){return document.getElementById(id);}
-function q(sel){return document.querySelector(sel);}
-function toast(msg){alert(msg);} // simple
 function ymdToday(){return new Date().toISOString().slice(0,10);}
 function ymThis(){return new Date().toISOString().slice(0,7);}
 
@@ -184,8 +183,8 @@ document.querySelectorAll('.tab').forEach(t=>{
 ['a_tanggal','p_tanggal','r_dari','r_sampai','ex_dari','ex_sampai'].forEach(id=>$(id).value=ymdToday());
 ['inv_bulan','rk_bulan','mk_bulan'].forEach(id=>$(id).value=ymThis());
 
-// Load logo
-api('logo_data',{},'GET').then(d=>{ if(d && d.src) $('logo').src = d.src; });
+// Logo: override dari backend jika tersedia; kalau gagal/empty → tetap pakai ./logo.png
+api('logo_data',{},'GET').then(d=>{ if(d && d.src){ $('logo').src=d.src; } }).catch(()=>{});
 
 // Master load
 async function fillKelas(sel, cb){
@@ -234,7 +233,7 @@ $('r_add').addEventListener('click', async ()=>{
   const payload = { kelas_id:$('r_kelas_roster').value, siswa_id:$('r_siswa_all').value };
   if(!payload.kelas_id || !payload.siswa_id){ alert('Pilih kelas & siswa'); return; }
   await api('roster_add', payload, 'POST');
-  toast('Ditambahkan ke roster');
+  alert('Ditambahkan ke roster');
 });
 
 // Absensi save + PDF
@@ -245,7 +244,7 @@ $('a_submit').addEventListener('click', async ()=>{
   };
   if(!payload.tanggal||!payload.kelas_id||!payload.siswa_id){ alert('Lengkapi tanggal, kelas, siswa'); return; }
   await api('save_absensi', payload, 'POST');
-  toast('Absensi tersimpan');
+  alert('Absensi tersimpan');
 });
 $('a_pdf').addEventListener('click', async ()=>{
   const payload = { tanggal:$('a_tanggal').value, kelas_id:$('a_kelas').value };
@@ -369,7 +368,7 @@ $('mk_save').addEventListener('click', async ()=>{
   const bulan=$('mk_bulan').value; if(!bulan){ alert('Pilih bulan'); return; }
   $('mk_out').innerHTML='Menghitung dan menyimpan...';
   const res = await api('mukafaah_hitung',{bulan,save:true},'POST');
-  renderMukafaah(res); toast('Mukafaah tersimpan');
+  renderMukafaah(res); alert('Mukafaah tersimpan');
 });
 </script>
 </body>
