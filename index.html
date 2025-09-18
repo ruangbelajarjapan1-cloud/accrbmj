@@ -166,22 +166,48 @@
 </section>
 
 <script>
-// GANTI dengan URL Web App dari Apps Script (…/exec)
+// ==== GANTI dengan URL Web App dari Apps Script (…/exec) ====
 const BACKEND_URL = 'PASTE_WEB_APP_URL_DI_SINI';
 
 function $(id){return document.getElementById(id);}
 function ymdToday(){return new Date().toISOString().slice(0,10);}
 function ymThis(){return new Date().toISOString().slice(0,7);}
 
+// API helper: fetch -> fallback JSONP otomatis utk GET
 async function api(action, payload={}, method='POST'){
-  const url = BACKEND_URL + '?action=' + encodeURIComponent(action);
-  const opt = (method==='GET')
-    ? { method:'GET' }
-    : { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) };
-  const res = await fetch(url, opt);
-  const json = await res.json();
-  if(!json.ok) throw new Error(json.error||'API error');
-  return json.data;
+  try{
+    const url = BACKEND_URL + '?action=' + encodeURIComponent(action);
+    if (method === 'GET'){
+      const r = await fetch(url, {method:'GET'});
+      const j = await r.json();
+      if(!j.ok) throw new Error(j.error||'API error');
+      return j.data;
+    } else {
+      const r = await fetch(url, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+      const j = await r.json();
+      if(!j.ok) throw new Error(j.error||'API error');
+      return j.data;
+    }
+  }catch(e){
+    if (method !== 'GET') throw e; // fallback hanya utk GET
+    return new Promise((resolve, reject)=>{
+      const cb = 'cb_'+Math.random().toString(36).slice(2);
+      window[cb] = (j)=>{
+        try{ delete window[cb]; document.body.removeChild(s); }catch(_){}
+        if(!j || j.ok!==true) return reject(new Error((j&&j.error)||'API error'));
+        resolve(j.data);
+      };
+      const s = document.createElement('script');
+      s.src = BACKEND_URL + '?action=' + encodeURIComponent(action) + '&callback=' + cb;
+      s.onerror = ()=>{ try{ delete window[cb]; document.body.removeChild(s); }catch(_){}
+        reject(new Error('JSONP error')); };
+      document.body.appendChild(s);
+    });
+  }
 }
 
 // Tabs
@@ -199,7 +225,7 @@ document.querySelectorAll('.tab').forEach(t=>{
 ['a_tanggal','p_tanggal','g_tanggal','r_dari','r_sampai','ex_dari','ex_sampai'].forEach(id=>$(id).value=ymdToday());
 ['inv_bulan','rk_bulan','mk_bulan'].forEach(id=>$(id).value=ymThis());
 
-// Logo override (fallback sudah ./logo.png)
+// Logo override (fallback ./logo.png)
 api('logo_data',{},'GET').then(d=>{ if(d && d.src){ $('logo').src=d.src; } }).catch(()=>{});
 
 // Master load
