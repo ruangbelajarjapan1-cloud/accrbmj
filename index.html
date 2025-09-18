@@ -20,13 +20,11 @@
   .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .hidden{display:none!important}
   .muted{color:#666;font-size:12px}
-  .btn-wa{background:#0ea5e9}
-  a.link{color:#0ea5e9;text-decoration:none}
+  .link{color:#0ea5e9;text-decoration:none}
 </style>
 </head>
 <body>
 <header>
-  <!-- Fallback: logo di repo GitHub -->
   <img id="logo" src="./logo.png" alt="logo"/>
   <h1>RBMJepang</h1>
 </header>
@@ -51,7 +49,7 @@
   <select id="a_status"><option>Hadir</option><option>Izin</option><option>Alpha</option></select>
   <label>Keterangan</label><textarea id="a_ket" rows="2"></textarea>
   <button id="a_submit">Simpan Absensi</button>
-  <button id="a_pdf" class="btn-wa">Cetak & WhatsApp Absensi (PDF)</button>
+  <button id="a_pdf">Cetak & WhatsApp Absensi (PDF)</button>
   <div id="a_pdf_out" class="muted" style="margin-top:6px"></div>
 </section>
 
@@ -72,6 +70,8 @@
     </div>
     <div><label>Metode</label><select id="p_metode"><option>Tunai</option><option>Transfer</option></select></div>
   </div>
+  <label>Nomor WhatsApp (opsional)</label>
+  <input id="p_wa_number" placeholder="contoh: 6281234567890">
   <label>Catatan</label><textarea id="p_catatan" rows="2"></textarea>
   <button id="p_submit">Simpan Pembayaran</button>
   <div id="p_kw" class="hidden" style="margin-top:10px">
@@ -80,9 +80,23 @@
   </div>
 </section>
 
-<!-- PENGELUARAN (placeholder: sambungkan bila perlu) -->
+<!-- PENGELUARAN -->
 <section id="pengeluaran" class="card hidden">
-  <div class="muted">Form Pengeluaran belum dihubungkan ke API (sama seperti WebApp-mu sekarang). Tambah endpoint lalu sambungkan jika diperlukan.</div>
+  <div class="row">
+    <div>
+      <label>Tanggal</label>
+      <input id="g_tanggal" type="date">
+    </div>
+    <div>
+      <label>Kategori</label>
+      <input id="g_kategori" placeholder="Sewa, ATK, Listrik, dll">
+    </div>
+  </div>
+  <label>Nominal</label>
+  <input id="g_nominal" type="number" min="0">
+  <label>Catatan</label>
+  <textarea id="g_catatan" rows="2"></textarea>
+  <button id="g_submit">Simpan Pengeluaran</button>
 </section>
 
 <!-- ROSTER -->
@@ -107,6 +121,7 @@
     <div><label>Jatuh Tempo</label><input id="inv_jt" type="date"></div>
   </div>
   <label>Catatan</label><input id="inv_note">
+  <label>Nomor WhatsApp (opsional)</label><input id="inv_wa" placeholder="contoh: 6281234567890">
   <button id="inv_btn">Buat Invoice PDF</button>
   <div id="inv_out" class="muted" style="margin-top:8px"></div>
 
@@ -151,7 +166,8 @@
 </section>
 
 <script>
-const BACKEND_URL = 'PASTE_WEB_APP_URL_DI_SINI'; // <-- ganti dengan URL Web App Apps Script kamu
+// GANTI dengan URL Web App dari Apps Script (…/exec)
+const BACKEND_URL = 'PASTE_WEB_APP_URL_DI_SINI';
 
 function $(id){return document.getElementById(id);}
 function ymdToday(){return new Date().toISOString().slice(0,10);}
@@ -179,11 +195,11 @@ document.querySelectorAll('.tab').forEach(t=>{
   });
 });
 
-// Prefill dates
-['a_tanggal','p_tanggal','r_dari','r_sampai','ex_dari','ex_sampai'].forEach(id=>$(id).value=ymdToday());
+// Prefill
+['a_tanggal','p_tanggal','g_tanggal','r_dari','r_sampai','ex_dari','ex_sampai'].forEach(id=>$(id).value=ymdToday());
 ['inv_bulan','rk_bulan','mk_bulan'].forEach(id=>$(id).value=ymThis());
 
-// Logo: override dari backend jika tersedia; kalau gagal/empty → tetap pakai ./logo.png
+// Logo override (fallback sudah ./logo.png)
 api('logo_data',{},'GET').then(d=>{ if(d && d.src){ $('logo').src=d.src; } }).catch(()=>{});
 
 // Master load
@@ -228,7 +244,7 @@ async function loadAllSiswaForRoster(){
   tryPreviewSPP();
 }
 
-// Roster add
+// Roster
 $('r_add').addEventListener('click', async ()=>{
   const payload = { kelas_id:$('r_kelas_roster').value, siswa_id:$('r_siswa_all').value };
   if(!payload.kelas_id || !payload.siswa_id){ alert('Pilih kelas & siswa'); return; }
@@ -236,7 +252,7 @@ $('r_add').addEventListener('click', async ()=>{
   alert('Ditambahkan ke roster');
 });
 
-// Absensi save + PDF
+// Absensi
 $('a_submit').addEventListener('click', async ()=>{
   const payload = {
     tanggal:$('a_tanggal').value, kelas_id:$('a_kelas').value, siswa_id:$('a_siswa').value,
@@ -255,7 +271,7 @@ $('a_pdf').addEventListener('click', async ()=>{
   window.open(doc.wa,'_blank');
 });
 
-// Preview SPP otomatis
+// Preview SPP
 async function tryPreviewSPP(){
   const item = ($('p_item').value||'').trim().toUpperCase();
   const siswa_id = $('p_siswa').value;
@@ -279,22 +295,39 @@ $('p_submit').addEventListener('click', async ()=>{
   const tanggal = $('p_tanggal').value;
   const payload = {
     tanggal, periode:(tanggal||'').slice(0,7), kelas_id:$('p_kelas').value, siswa_id:$('p_siswa').value,
-    item:$('p_item').value, nominal:$('p_nominal').value, metode:$('p_metode').value, catatan:$('p_catatan').value
+    item:$('p_item').value, nominal:$('p_nominal').value, metode:$('p_metode').value,
+    catatan:$('p_catatan').value
   };
   if(!payload.tanggal || !payload.siswa_id || !payload.item){ alert('Lengkapi tanggal, siswa, item'); return; }
   const saved = await api('save_pembayaran', payload, 'POST');
-  const doc = await api('generate_kwitansi', { pembayaran_id:saved.id }, 'POST');
+  const doc = await api('generate_kwitansi', { pembayaran_id:saved.id, wa_number:$('p_wa_number').value }, 'POST');
   $('p_kw').classList.remove('hidden');
   $('kw_link').href = doc.url;
   $('kw_wa').href = doc.wa;
   window.open(doc.wa,'_blank');
 });
 
+// Pengeluaran
+$('g_submit').addEventListener('click', async ()=>{
+  const payload = {
+    tanggal: $('g_tanggal').value,
+    kategori: $('g_kategori').value,
+    nominal:  $('g_nominal').value,
+    catatan:  $('g_catatan').value
+  };
+  if(!payload.tanggal || !payload.kategori || !payload.nominal){
+    alert('Lengkapi tanggal, kategori, dan nominal'); return;
+  }
+  await api('save_pengeluaran', payload, 'POST');
+  alert('Pengeluaran tersimpan');
+  $('g_kategori').value=''; $('g_nominal').value=''; $('g_catatan').value='';
+});
+
 // Invoice
 $('inv_btn').addEventListener('click', async ()=>{
   const payload = {
     bulan:$('inv_bulan').value, kelas_id:$('inv_kelas').value, siswa_id:$('inv_siswa').value,
-    jatuh_tempo:$('inv_jt').value, catatan:$('inv_note').value
+    jatuh_tempo:$('inv_jt').value, catatan:$('inv_note').value, wa_number:$('inv_wa').value
   };
   if(!payload.bulan||!payload.kelas_id||!payload.siswa_id){ alert('Lengkapi bulan, kelas, siswa'); return; }
   $('inv_out').innerHTML='Membuat Invoice...';
@@ -308,15 +341,13 @@ $('ex_pb').addEventListener('click', async ()=>{
   const range = { jenis:'pembayaran', dari:$('ex_dari').value, sampai:$('ex_sampai').value };
   $('ex_out').innerHTML='Mengekspor...';
   const r = await api('export_csv', range, 'POST');
-  if(!r || !r.url){ $('ex_out').innerHTML='Tidak ada data untuk diekspor.'; return; }
-  $('ex_out').innerHTML = `<a class="link" href="${r.url}" target="_blank">Download CSV Pembayaran</a>`;
+  $('ex_out').innerHTML = r && r.url ? `<a class="link" href="${r.url}" target="_blank">Download CSV Pembayaran</a>` : 'Tidak ada data.';
 });
 $('ex_pg').addEventListener('click', async ()=>{
   const range = { jenis:'pengeluaran', dari:$('ex_dari').value, sampai:$('ex_sampai').value };
   $('ex_out').innerHTML='Mengekspor...';
   const r = await api('export_csv', range, 'POST');
-  if(!r || !r.url){ $('ex_out').innerHTML='Tidak ada data untuk diekspor.'; return; }
-  $('ex_out').innerHTML = `<a class="link" href="${r.url}" target="_blank">Download CSV Pengeluaran</a>`;
+  $('ex_out').innerHTML = r && r.url ? `<a class="link" href="${r.url}" target="_blank">Download CSV Pengeluaran</a>` : 'Tidak ada data.';
 });
 
 // Rekap
