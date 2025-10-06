@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --pad: 12px;
+  --radius: 14px;
+}
+
+html, body { height: 100%; background: #f6f7fb; color: #111827; }
+.container { max-width: 1080px; margin: 0 auto; padding: 16px; }
+.card { background: #fff; border-radius: 14px; box-shadow: 0 1px 4px rgba(0,0,0,.06); padding: 16px; }
+.btn { @apply inline-flex items-center justify-center rounded-xl bg-slate-900 text-white font-semibold px-4 py-2; }
+.btn:disabled { @apply opacity-60 cursor-not-allowed; }
+.input, .select, .textarea { @apply w-full rounded-xl border border-gray-200 bg-gray-50 px-3 py-2; }
+.grid-2 { @apply grid gap-3 md:grid-cols-2; }
+.grid-3 { @apply grid gap-3 md:grid-cols-3; }
+.table { @apply w-full border-collapse text-sm; }
+.table th, .table td { @apply border border-gray-200 p-2; }
+.table th { @apply bg-gray-50 text-left; }
+.badge { @apply inline-block rounded-full px-2 py-0.5 text-xs; }
+.badge-green { @apply bg-green-50 text-green-700; }
+.badge-yellow { @apply bg-yellow-50 text-yellow-700; }
+.badge-red { @apply bg-rose-50 text-rose-700; }
